@@ -1,0 +1,96 @@
+directive @auth(
+  requires: Role = admin,
+) on OBJECT | FIELD_DEFINITION
+
+
+enum Role {
+  admin
+  user
+}
+
+type User{
+  id: ID!
+  firstName: String!
+  lastName: String!
+  username: String!
+  email: String!
+  role: Role! @auth(requires: admin)
+  password: String!
+}
+
+type DeleteResponse{
+  message : String!
+}
+
+type SignUpResponse {
+  token: String!
+  message: String!
+  createdUser : User
+}
+
+type ForgetPasswordResponse {
+  message: String!
+  updatedUser: User
+}
+type AuthResponse {
+  message: String!
+  token: String!
+}
+
+type PasswordResetResponse {
+  message: String!
+  user: User
+}
+
+type assignRoleResponse {
+  user: User
+  message: String!
+}
+
+input NewUserInput {
+  firstName: String!
+  lastName: String!
+  username: String!
+  email: String!
+  password: String!
+  role: String!
+}
+
+input UpdateUserInput {
+  firstName: String
+  lastName: String
+  username: String
+  email: String
+  password: String
+}
+
+input loginInput {
+  email: String!
+  password: String!
+}
+
+input resetPasswordInput {
+  token: String!
+  password: String!
+}
+
+input assignRoleInput {
+ id: ID!
+ role: String!
+}
+
+type Query {
+  getUser(id: ID): User! @auth(requires: user)
+  getUsers: [User!] @auth(requires: admin)
+  forgetPassword(email: String!): ForgetPasswordResponse! @auth(requires: user)
+  signIn(input: loginInput): AuthResponse!
+}
+
+type Mutation {
+  createUser(input: NewUserInput!): User! @auth(requires: admin)
+  signUp(input: NewUserInput): SignUpResponse!
+  resetPassword(input: resetPasswordInput): PasswordResetResponse!
+  editUser(id: ID!, input: UpdateUserInput) : User! @auth(requires:user)
+  deleteUser(id: ID!): DeleteResponse! @auth(requires: admin)
+  addRole(input: assignRoleInput): assignRoleResponse! @auth(requires: admin)
+}
